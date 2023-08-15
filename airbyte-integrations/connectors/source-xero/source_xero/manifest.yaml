@@ -8,29 +8,32 @@ definitions:
       field_path: []
   requester:
     type: HttpRequester
-    url_base: "https://example.com"
+    url_base: "https://api.xero.com/api.xro/2.0/"
     http_method: "GET"
     authenticator:
       type: BearerAuthenticator
-      api_token: "{{ config['api_key'] }}"
+      api_token: "{{ config['tenant_id'] }}"
+    request_options_provider:
+      request_parameters:
+        Accept: "application/json"
+        Xero-Tenant-Id: "{{ config['tenant_id'] }}"
+      request_headers:
+        header_key1: header_value1
+        header_key2: header_value2
   retriever:
     type: SimpleRetriever
-    record_selector:
-      $ref: "#/definitions/selector"
-    paginator:
-      type: NoPagination
     requester:
       $ref: "#/definitions/requester"
   base_stream:
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever"
-  customers_stream:
+  xero_stream:
     $ref: "#/definitions/base_stream"
-    name: "customers"
+    name: "xero_stream"
     primary_key: "id"
     $parameters:
-      path: "/example"
+      path: "/xero_stream"
 
 streams:
   - "#/definitions/customers_stream"
