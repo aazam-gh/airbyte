@@ -1,0 +1,179 @@
+version: "0.29.0"
+
+definitions:
+  selector:
+    type: RecordSelector
+    extractor:
+      type: DpathExtractor
+      field_path: []
+  requester:
+    type: HttpRequester
+    url_base: "https://{{ config['domain'] }}/api/v1"
+    http_method: "GET"
+    authenticator:
+      type: APIKeyAuthenticator
+      header: "Authorization"
+      api_token: "SSWS {{ config['token'] }}" 
+  datetime_cursor:
+    type: "DatetimeBasedCursor"
+    start_datetime:
+      datetime: "{{ config['start_date'] }}"
+      datetime_format: "%Y-%m-%d"
+    end_datetime:
+      datetime: "{{ now_utc() }}"
+      datetime_format: "%Y-%m-%d %H:%M:%S.%f+00:00"
+    step: "P1D"
+    datetime_format: "%Y-%m-%d"
+    cursor_granularity: "P1D"
+  retriever:
+    type: SimpleRetriever
+    record_selector:
+      $ref: "#/definitions/selector"
+    paginator:
+      type: NoPagination
+    requester:
+      $ref: "#/definitions/requester"
+  base_stream:
+    type: DeclarativeStream
+    retriever:
+      $ref: "#/definitions/retriever"
+  incremental_base_stream:
+    type: DeclarativeStream
+    incremental_sync:
+      $ref: "#/definitions/datetime_cursor"
+    retriever:
+      $ref: "#/definitions/retriever"
+  custom_roles_stream:
+    $ref: "#/definitions/base_stream"
+    name: "custom_roles"
+    primary_key: "id"
+    $parameters:
+      path: "/iam/roles"
+  custom_roles_stream:
+    $ref: "#/definitions/base_stream"
+    name: "custom_roles"
+    primary_key: "id"
+    $parameters:
+      path: "/iam/roles"
+  custom_roles_stream:
+    $ref: "#/definitions/base_stream"
+    name: "custom_roles"
+    primary_key: "id"
+    $parameters:
+      path: "/iam/roles"
+  custom_roles_stream:
+    $ref: "#/definitions/base_stream"
+    name: "custom_roles"
+    primary_key: "id"
+    $parameters:
+      path: "/iam/roles"
+  users_stream:
+    $ref: "#/definitions/base_stream"
+    name: "users"
+    primary_key: "id"
+    $parameters:
+      path: "/iam/users"
+  user_role_assignments_stream:
+    $ref: "#/definitions/base_stream"
+    name: "user_role_assignments"
+    primary_key: "id"
+    $parameters:
+      path: "/iam/roles"
+
+streams:
+  - "#/definitions/custom_roles_stream"
+  - "#/definitions/groups_stream"
+  - "#/definitions/grous_members_stream"
+  - "#/definitions/group_role_assignments_stream"
+  - "#/definitions/logs_stream"
+  - "#/definitions/permissions_stream"
+  - "#/definitions/resource_sets_stream"
+  - "#/definitions/users_stream"
+  - "#/definitions/user_role_assignments_stream"
+
+
+check:
+  type: CheckStream
+  stream_names:
+    - "custom_roles"
+    - "groups"
+    - "group_members"
+    - "group_role_assignments"
+    - "logs"
+    - "permissions"
+    - "resource_sets"
+    - "users"
+    - "user_role_assignments"
+
+
+spec:
+  documentationUrl: https://docs.airbyte.com/integrations/sources/okta
+  connection_specification:
+    $schema: http://json-schema.org/draft-07/schema#
+    title: Okta Spec
+    type: object
+    required: 
+      - credentials
+    additionalProperties: true
+    properties:
+      domain:
+        type: string
+        title: Okta domain
+        description: The Okta domain. See the <a href="https://docs.airbyte.com/integrations/sources/okta">docs</a>
+          for instructions on how to find it.
+        airbyte_secret: false
+      start_date:
+        type: string
+        pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        description: UTC date and time in the format YYYY-MM-DDTHH:MM:SSZ. Any data
+          before this date will not be replicated.
+        examples:
+        - '2022-07-22T00:00:00Z'
+        title: Start Date
+      credentials:
+        title: Authorization Method
+        type: object
+        oneOf:
+        - type: object
+          title: OAuth2.0
+          required:
+          - auth_type
+          - client_id
+          - client_secret
+          - refresh_token
+          properties:
+            auth_type:
+              type: string
+              const: oauth2.0
+              order: 0
+            client_id:
+              type: string
+              title: Client ID
+              description: The Client ID of your OAuth application.
+              airbyte_secret: true
+            client_secret:
+              type: string
+              title: Client Secret
+              description: The Client Secret of your OAuth application.
+              airbyte_secret: true
+            refresh_token:
+              type: string
+              title: Refresh Token
+              description: Refresh Token to obtain new Access Token, when it's expired.
+              airbyte_secret: true
+        - type: object
+          title: API Token
+          required:
+          - auth_type
+          - api_token
+          properties:
+            auth_type:
+              type: string
+              const: api_token
+              order: 0
+            api_token:
+              type: string
+              title: Personal API Token
+              description: An Okta token. See the <a href="https://docs.airbyte.com/integrations/sources/okta">docs</a>
+                for instructions on how to generate it.
+              airbyte_secret: true
