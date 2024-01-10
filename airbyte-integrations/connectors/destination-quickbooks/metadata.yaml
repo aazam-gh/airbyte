@@ -1,0 +1,32 @@
+data:
+  allowedHosts:
+    hosts:
+      - sandbox-quickbooks.api.intuit.com
+      - quickbooks.api.intuit.com
+      - oauth.platform.intuit.com
+  registries:
+    oss:
+      enabled: false
+    cloud:
+      enabled: false
+  connectorBuildOptions:
+    # Please update to the latest version of the connector base image.
+    # Please use the full address with sha256 hash to guarantee build reproducibility.
+    # https://hub.docker.com/r/airbyte/python-connector-base
+    baseImage: docker.io/airbyte/python-connector-base:1.0.0@sha256:dd17e347fbda94f7c3abff539be298a65af2d7fc27a307d89297df1081a45c27
+  connectorSubtype: database
+  connectorType: destination
+  definitionId: bc0f5066-5aee-4e05-bb68-fadfb6a6fa09
+  dockerImageTag: 0.1.0
+  dockerRepository: airbyte/destination-quickbooks
+  githubIssueLabel: destination-quickbooks
+  icon: quickbooks.svg
+  license: MIT
+  name: Quickbooks
+  releaseDate: TODO
+  releaseStage: alpha
+  supportLevel: community
+  documentationUrl: https://docs.airbyte.com/integrations/destinations/quickbooks
+  tags:
+    - language:python
+metadataSpecVersion: "1.0"
