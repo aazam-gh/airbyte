@@ -31,24 +31,18 @@ class DestinationQuickbooks(Destination):
             
             authorization_base_url = 'https://appcenter.intuit.com/connect/oauth2'
             token_url = 'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer'
-            scope = 'com.intuit.quickbooks.accounting'
+            scope = ['com.intuit.quickbooks.accounting']
 
              # Define the OAuth 2.0 session
             intuit = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
-            
             # Get the authorization URL
             authorization_url, state = intuit.authorization_url(authorization_base_url)
-            
             print('Please go to', authorization_url)
             authorization_response = input('Paste the full redirect URL here: ')
-            
             # Fetch the access token
             intuit.fetch_token(token_url, authorization_response=authorization_response, auth=HTTPBasicAuth(client_id, client_secret))
-            
-            response = intuit.get('https://sandbox-quickbooks.api.intuit.com/v3/company/<realm_id>/query?query=SELECT * FROM Customer')
- 
-            print(response.json())
-
+            ####End
+                
             return AirbyteConnectionStatus(status=Status.SUCCEEDED)
         except Exception as e:
             return AirbyteConnectionStatus(status=Status.FAILED, message=f"An exception occurred: {repr(e)}")
